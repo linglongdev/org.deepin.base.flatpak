@@ -1,0 +1,12 @@
+version: "1"
+package:
+  id: org.deepin.base.flatpak.kde
+  name: linglong flatpak runtime
+  version: 5.15.23.0
+  kind: runtime
+  description: flatpak runtime environment on linglong
+
+base: org.deepin.foundation/20.0.0.2
+
+build: |
+  echo skip

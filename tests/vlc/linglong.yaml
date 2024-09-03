@@ -1,0 +1,15 @@
+version: "1"
+package:
+  id: org.flatpak.vlc
+  name: vlc
+  version: 3.0.20.0
+  kind: app
+  description: |
+    VLC是一款自由、开源的跨平台多媒体播放器及框架，它支持大多数的音频与视频解码器及文件格式，还可以播放大多数多媒体文件，以及DVD、音频CD、VCD及各类流媒体协议。
+command: ["vlc"]
+base: org.deepin.base.flatpak.kde/5.15.23
+build: |
+  # 这是一个测试应用，需要先在项目根目录执行以下命令
+  # ostree pull flathub:app/org.videolan.VLC/x86_64/stable
+  # ostree --repo=flathub checkout flathub:app/org.videolan.VLC/x86_64/stable tests/vlc/files
+  cp -r stable/files/* $PREFIX

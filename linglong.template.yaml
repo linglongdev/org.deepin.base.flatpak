@@ -1,0 +1,12 @@
+version: "1"
+package:
+  id: $APPID
+  name: linglong flatpak runtime
+  version: $VERSION
+  kind: runtime
+  description: flatpak runtime environment on linglong
+
+base: org.deepin.foundation/20.0.0.2
+
+build: |
+  echo skip

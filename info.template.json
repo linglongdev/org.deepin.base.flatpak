@@ -1,0 +1,15 @@
+{
+  "appid": "$APPID",
+  "arch": ["x86_64"],
+  "base": "org.deepin.foundation/20.0.2",
+  "description": "flatpak runtime environment on linglong",
+  "kind": "runtime",
+  "module": "$MODULE",
+  "name": "linglong flatpak runtime",
+  "overlayfs": {},
+  "permissions": {},
+  "runtime": "latest",
+  "size": 1024000,
+  "version": "$VERSION",
+  "channel": "main"
+}
