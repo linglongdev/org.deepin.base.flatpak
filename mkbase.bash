@@ -15,14 +15,15 @@ ref="flathub:runtime/$appid/x86_64/$version"
 
 # 创建临时工作目录
 project=$PWD
-workdir=$(mktemp -d)
+workdir=$(mktemp -d -p "$project")
 mkdir -p "$workdir/binary"
 mkdir -p "$workdir/develop"
 
 # 转换为玲珑的应用ID，规则是将runtime名称按'.'分割，取第二位 如 org.kde.Platform生成org.deepin.base.flatpak.kde
 export APPID="org.deepin.base.flatpak.$(echo "$appid"|awk -F'.' '{print $2}')"
 # 转换为玲珑的版本，规则是按'.'和'-'分割取前三位，不足三位补0，再末尾补充输入的打包版本号，如 5.15-23.08 生成 5.15.23.0
-export VERSION="$(echo "$version.0.0.0" | awk -F'[-.]' 'BEGIN {OFS="."} {print $1,$2,$3}').$tweak"
+# 如果某位版本号以0开头，去掉0，如 5.15-23.08 生成 5.15.23.8
+export VERSION="$(echo "${version/.0/.}.0.0.0" | awk -F'[-.]' 'BEGIN {OFS="."} {print $1,$2,$3}').$tweak"
 # 生成linglong.yaml文件和info.json文件
 envsubst < linglong.template.yaml > "linglong.yaml"
 cp linglong.yaml "$workdir/binary/"
@@ -52,6 +53,21 @@ glRef="flathub:runtime/org.freedesktop.Platform.GL.default/x86_64/$glVersion"
 ostree --repo=flathub refs | grep "$glRef" || ostree --repo=flathub pull "$glRef"
 ostree --repo=flathub checkout --subpath=files "$glRef" "$workdir/binary/files/files/lib/x86_64-linux-gnu/GL/default"
 
+# 将 metadata 的 Environment 保存到 /etc/profile.d/0flatpak.sdk.sh
+if grep '^\[Environment\]' "$workdir/binary/files/metadata"; then
+    mkdir -p "$workdir/binary/files/etc/profile.d"
+    profile="$workdir/binary/files/etc/profile.d/10flatpak.sdk.sh"
+    echo "#!/bin/sh" > "$profile"
+    grep -A 1000 '^\[Environment\]' "$workdir/binary/files/metadata" | # 匹配 [Environment] 后面的内容
+        sed -n '1!p' | # 去除 [Environment] 这一行
+        grep -B 1000 -m 1 '^\[' | # 匹配下一个[开头之前的内容
+        sed -n '$!p' | # 去除下一个[开头的行
+        sed 's/ //g' | # 去除所有空格
+        xargs -i echo export {} | # 在每行前面添加export
+        cat >> "$profile" # 保存文件
+    sed -i "s#/app/#/opt/apps/\$LINGLONG_APPID/files/#g" "$profile"
+fi
+
 cd "$workdir/binary/files"
 # flatpak的platform做为base的usr目录
 mv files usr
@@ -75,7 +91,6 @@ rm etc/ssl/certs
 # etc/profile.d/linglong.sh 用于配置玲珑应用环境变量
 
 # /usr/bin/xdg-email和/usr/bin/xdg-open 通过dbus调用宿主机
-
 cp -rP $project/patch_rootfs/* ./
 
 # 提交到layer中
