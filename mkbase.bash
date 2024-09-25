@@ -81,16 +81,7 @@ cp -r usr/etc ./
 # 删除certs，因为玲珑会使用宿主机的certs目录
 rm etc/ssl/certs
 
-# 给base添加一些必要的文件
-# etc/ld.so.conf 用于给ldconfig提供配置，引用 ld.so.conf.d 目录下的配置
-# etc/ld.so.conf.d/x86_64-linux-gnu.conf 复制于deepin 23，提供基础配置
-# etc/ld.so.conf.d/zz_deepin-linglong-app.conf 空文件，提供一个挂载点
-# etc/ld.so.conf.d/gl.conf opengl相关的配置，提供opengl相关库的搜索路径
-
-# etc/profile 用于给bash提供配置，引用 profile.d 目录下的配置
-# etc/profile.d/linglong.sh 用于配置玲珑应用环境变量
-
-# /usr/bin/xdg-email和/usr/bin/xdg-open 通过dbus调用宿主机
+# 给base添加一些必要的文件，文件具体作用见 README.md
 cp -rP $project/patch_rootfs/* ./
 
 # 提交到layer中
