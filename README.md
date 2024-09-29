@@ -28,3 +28,5 @@ patch_rootfs/usr/bin/xdg-email 和/usr/bin/xdg-open 通过 dbus 调用宿主机
 patch_rootfs/app 软链接用于模拟 flatpak 的 app 目录，由于 linglong 的 app 目录包含应用 ID, 所以 base 的 /app 指向 /run/linglong/app ，应用再运行时创建 /run/linglong/app 软链接指向真实的 /opt/apps/$APPID/files
 
 refs.sh 用于生成 refs.list 文件，方便查看 flathub 的所有 ref，并且会批量下载所有 Platform（被视为玲珑的 base） 皆为的 ref
+
+platforms.list 是经过测试可用的 Platforms，可使用 `cat supports.list | xargs -i sh -c "./mkbase.bash {}; ll-builder push --no-develop -v"` 批量更新
