@@ -4,9 +4,16 @@ tripletList=$(cat /etc/linglong-triplet-list)
 
 # Default directory list: / /runtime /usr
 dirs="/runtime /usr ''"
+
+# AppHome defaults to /opt/apps/$LINGLONG_APPID/files
+AppHome="/opt/apps/$LINGLONG_APPID/files"
+if [ -n "$LINGLONG_APPHOME" ]; then
+    AppHome="$LINGLONG_APPHOME"
+fi
+
 # Update the directory list if LINGLONG_APPID exists
 if [ -n "$LINGLONG_APPID" ]; then
-    dirs="/opt/apps/$LINGLONG_APPID/files ${dirs}"
+    dirs="$AppHome ${dirs}"
 fi
 
 for dir in $dirs; do
@@ -57,6 +64,6 @@ if [ -e "/runtime/etc/profile" ]; then
 fi
 
 # apply app profile
-if [ -e "/opt/apps/$LINGLONG_APPID/files/etc/profile" ]; then
-    . "/opt/apps/$LINGLONG_APPID/files/etc/profile"
+if [ -n "$LINGLONG_APPID" ] && [ -e "$AppHome/etc/profile" ]; then
+    . "$AppHome/etc/profile"
 fi

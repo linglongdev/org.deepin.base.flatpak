@@ -65,7 +65,6 @@ if grep '^\[Environment\]' "$workdir/binary/files/metadata"; then
         sed 's/ //g' | # 去除所有空格
         xargs -i echo export {} | # 在每行前面添加export
         cat >> "$profile" # 保存文件
-    sed -i "s#/app/#/opt/apps/\$LINGLONG_APPID/files/#g" "$profile"
 fi
 
 cd "$workdir/binary/files"

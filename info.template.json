@@ -1,5 +1,6 @@
 {
-  "appid": "$APPID",
+  "schema_version": "1.0",
+  "id": "$APPID",
   "arch": ["x86_64"],
   "base": "org.deepin.foundation/20.0.2",
   "description": "flatpak runtime environment on linglong",
@@ -11,5 +12,6 @@
   "runtime": "latest",
   "size": 1024000,
   "version": "$VERSION",
-  "channel": "main"
+  "channel": "main",
+  "app_home": "/app"
 }
