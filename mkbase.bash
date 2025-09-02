@@ -3,9 +3,6 @@
 set -x
 set -e
 
-# 清理linglong-builder目录
-rm -rf ~/.cache/linglong-builder || true
-
 # flatpak runtime名称
 appid=$1
 # flatpak runtime版本
@@ -66,7 +63,8 @@ retry_command() {
 
 # 初始化ostree仓库
 ostree init --repo=flathub --mode bare-user-only
-ostree --repo=flathub remote add --if-not-exists --no-sign-verify flathub https://dl.flathub.org/repo/
+ostree --repo=flathub remote delete --if-exists flathub
+ostree --repo=flathub remote add --no-sign-verify flathub $FLATHUB_REPO_URL
 
 # 下载flatpak的platform
 ostree --repo=flathub refs | grep "$ref" || {
@@ -133,22 +131,12 @@ mkdir sys || true
 
 rm -rf "$workdir/binary/files/lib/systemd" || true
 
+# 打包为tar格式
 cd $project
-
-# 导入转置的base 到 builder 里
-ll-builder import-dir "$workdir/binary"
-# 复制binary文件到 develop 目录
-mkdir -p "$workdir/develop/files"
-cp -r $workdir/binary/files/* "$workdir/develop/files/"
-ll-builder import-dir "$workdir/develop"
-
-# 推送到仓库
-ll-builder push --repo-url "$LINGLONG_REPO_URL" --repo-name old --module binary || {
-    echo "binary 模块推送失败，但继续执行"
-}
-ll-builder push --repo-url "$LINGLONG_REPO_URL" --repo-name old --module develop || {
-    echo "develop 模块推送失败，但继续执行"
-}
+tar -czf "${APPID}_${VERSION}_binary.tgz" -C $workdir/binary .
+# develop和binary共用同一个files目录
+mv "$workdir/binary/files" "$workdir/develop/"
+tar -czf "${APPID}_${VERSION}_develop.tgz" -C $workdir/develop .
 
 # 清理临时工作目录
 rm -rf "$workdir"

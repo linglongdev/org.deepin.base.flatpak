@@ -3,7 +3,7 @@
   "arch": ["x86_64"],
   "base": "org.deepin.foundation/20.0.2",
   "description": "flatpak runtime environment on linglong",
-  "kind": "runtime",
+  "kind": "base",
   "module": "$MODULE",
   "name": "linglong flatpak runtime",
   "overlayfs": {},

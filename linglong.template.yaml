@@ -3,7 +3,7 @@ package:
   id: $APPID
   name: linglong flatpak runtime
   version: $VERSION
-  kind: runtime
+  kind: base
   description: flatpak runtime environment on linglong
 
 base: org.deepin.foundation/20.0.0

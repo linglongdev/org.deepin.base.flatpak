@@ -30,7 +30,6 @@ for dir in $dirs; do
     # Skip the root directory
     if [ -n "$dir" ]; then
         XDG_DATA_DIRS=$dir/share:$dir/local/share:$XDG_DATA_DIRS
-        XDG_CONFIG_DIRS=$dir/share:$dir/local/share:$XDG_CONFIG_DIRS
         CFLAGS="-I$dir/include $CFLAGS"
     fi
 done
@@ -38,7 +37,12 @@ done
 # remove trailing colons
 export PATH="${PATH%:}"
 export XDG_DATA_DIRS="${XDG_DATA_DIRS%:}"
-export XDG_CONFIG_DIRS="${XDG_CONFIG_DIRS%:}"
+export XDG_CONFIG_DIRS="/etc/xdg:/runtime/etc/xdg"
+
+if [ -n "$LINGLONG_APPID" ]; then
+    export XDG_CONFIG_DIRS="$XDG_CONFIG_DIRS:/opt/apps/$LINGLONG_APPID/files/etc/xdg"
+fi
+
 
 # Set these environment variables only during the build
 if [ -n "$PREFIX" ]; then

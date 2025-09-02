@@ -1,0 +1,2 @@
+#!/bin/sh
+systemd-run --user --service-type=forking /usr/bin/xdg-mime "$@"
