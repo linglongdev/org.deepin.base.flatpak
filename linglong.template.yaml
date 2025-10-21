@@ -6,7 +6,7 @@ package:
   kind: base
   description: flatpak runtime environment on linglong
 
-base: org.deepin.foundation/20.0.0
+base: org.deepin.empty/1.0.0
 
 build: |
   echo skip

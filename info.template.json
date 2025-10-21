@@ -1,7 +1,7 @@
 {
   "appid": "$APPID",
   "arch": ["x86_64"],
-  "base": "org.deepin.foundation/20.0.2",
+  "base": "org.deepin.empty/1.0.0",
   "description": "flatpak runtime environment on linglong",
   "kind": "base",
   "module": "$MODULE",

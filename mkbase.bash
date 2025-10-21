@@ -19,25 +19,6 @@ readonly PROFILE_SCRIPT_NAME="10flatpak.sdk.sh"
 # flatpak runtime在ostree中的分支名
 ref="flathub:runtime/$appid/x86_64/$version"
 
-# 创建临时工作目录
-project="$SCRIPT_DIR"
-workdir=$(mktemp -d -p "$project")
-mkdir -p "$workdir/binary"
-mkdir -p "$workdir/develop"
-
-# 转换为玲珑的应用ID，规则是将runtime名称按'.'分割，取第二位 如 org.kde.Platform生成org.deepin.base.flatpak.kde
-export APPID="org.deepin.base.flatpak.$(echo "$appid"|awk -F'.' '{print $2}')"
-# 转换为玲珑的版本，规则是按'.'和'-'分割取前三位，不足三位补0，再末尾补充输入的打包版本号，如 5.15-23.08 生成 5.15.23.0
-# 如果某位版本号以0开头，去掉0，如 5.15-23.08 生成 5.15.23.8
-export VERSION="$(echo "${version/.0/.}.0.0.0" | awk -F'[-.]' 'BEGIN {OFS="."} {print $1,$2,$3}').$tweak"
-
-# 生成linglong.yaml文件和info.json文件
-envsubst < linglong.template.yaml > "linglong.yaml"
-cp linglong.yaml "$workdir/binary/"
-cp linglong.yaml "$workdir/develop/"
-MODULE="binary" envsubst < info.template.json > "$workdir/binary/info.json"
-MODULE="develop" envsubst < info.template.json > "$workdir/develop/info.json"
-
 # 重试执行函数
 retry_command() {
     local max_attempts=5
@@ -67,9 +48,28 @@ ostree --repo=flathub remote delete --if-exists flathub
 ostree --repo=flathub remote add --no-sign-verify flathub $FLATHUB_REPO_URL
 
 # 下载flatpak的platform
-ostree --repo=flathub refs | grep "$ref" || {
-    retry_command "ostree --validate depend versionrepo=flathub pull '$ref'" "下载 flatpak platform $ref"
-}
+
+retry_command "ostree --repo=flathub pull '$ref'" "下载 flatpak platform $ref"
+
+# 创建临时工作目录
+project="$SCRIPT_DIR"
+workdir=$(mktemp -d -p "$project")
+mkdir -p "$workdir/binary"
+mkdir -p "$workdir/develop"
+
+# 转换为玲珑的应用ID，规则是将runtime名称按'.'分割，取第二位 如 org.kde.Platform生成org.deepin.base.flatpak.kde
+export APPID="org.deepin.base.flatpak.$(echo "$appid"|awk -F'.' '{print $2}')"
+# 转换为玲珑的版本，规则是按'.'和'-'分割取前三位，不足三位补0，再末尾补充输入的打包版本号，如 5.15-23.08 生成 5.15.23.0
+# 如果某位版本号以0开头，去掉0，如 5.15-23.08 生成 5.15.23.8
+export VERSION="$(echo "${version/.0/.}.0.0.0" | awk -F'[-.]' 'BEGIN {OFS="."} {print $1,$2,$3}').$tweak"
+
+# 生成linglong.yaml文件和info.json文件
+envsubst < linglong.template.yaml > "linglong.yaml"
+cp linglong.yaml "$workdir/binary/"
+cp linglong.yaml "$workdir/develop/"
+MODULE="binary" envsubst < info.template.json > "$workdir/binary/info.json"
+MODULE="develop" envsubst < info.template.json > "$workdir/develop/info.json"
+
 ostree --repo=flathub checkout "$ref" "$workdir/binary/files"
 # 获取runtime的gl扩展的版本
 glVersion=$(grep -A100 'Extension org.freedesktop.Platform.GL' "$workdir/binary/files/metadata" |grep -E '^versions|Extension'|head -n2|grep versions|awk -F'[=;]' '{print $2}'|xargs)
@@ -130,7 +130,6 @@ mkdir dev || true
 mkdir sys || true
 
 rm -rf "$workdir/binary/files/lib/systemd" || true
-
 # 打包为tar格式
 cd $project
 tar -czf "${APPID}_${VERSION}_binary.tgz" -C $workdir/binary .
